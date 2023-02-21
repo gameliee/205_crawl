@@ -25,6 +25,8 @@ class JobsSpider(CrawlSpider):
         print(f"huhuhu im here at {response.url}")
         yield {
             'url': response.url,
+            'job-details__title': response.xpath("//h1[@class='job-details__title']/text()").get(),
+            # 'job-details__save-job': response.xpath("//div[@class='job-details__save-job']/@data-jobs--save-data-layer-value']").get(),
             'job detail header': response.xpath("//div[@class='job-details__header']").get(),
             'top reason to join us': response.xpath("//div[@class='job-details__top-reason-to-join-us']").get(),
             'job detail overview': response.xpath("//div[@class='job-details__overview']").get(),
