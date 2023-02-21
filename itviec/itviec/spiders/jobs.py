@@ -1,3 +1,4 @@
+import json
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 from scrapy.dupefilters import RFPDupeFilter
@@ -8,10 +9,11 @@ class JobsSpider(CrawlSpider):
     start_urls = ["http://itviec.com/it-jobs"]
 
     custom_settings={
-        'FEED_URI': "all_%(time)s.marshal",
-        'FEED_FORMAT': 'marshal',
+        'FEED_URI': "all_%(time)s.pickle",
+        'FEED_FORMAT': 'pickle',
         'DUPEFILTER_CLASS': RFPDupeFilter,
-        'AUTOTHROTTLE_ENABLED': True
+        'AUTOTHROTTLE_ENABLED': True,
+        'LOG_LEVEL': 'WARNING'
     }
 
     rules = (
@@ -22,15 +24,12 @@ class JobsSpider(CrawlSpider):
 
     def parse_single_job(self, response):
         """parse job details"""
-        print(f"huhuhu im here at {response.url}")
+        # print(f"huhuhu im here at {response.url}")
+        job_details_to_save = response.xpath("//div[@class='job-details__save-job']/@data-jobs--save-data-layer-value").get()
+        job_details_to_save = json.loads(job_details_to_save)
+        print(response.url)
         yield {
             'url': response.url,
-            'job-details__title': response.xpath("//h1[@class='job-details__title']/text()").get(),
-            # 'job-details__save-job': response.xpath("//div[@class='job-details__save-job']/@data-jobs--save-data-layer-value']").get(),
-            'job detail header': response.xpath("//div[@class='job-details__header']").get(),
-            'top reason to join us': response.xpath("//div[@class='job-details__top-reason-to-join-us']").get(),
-            'job detail overview': response.xpath("//div[@class='job-details__overview']").get(),
-            'second titles': response.xpath("//div[@class='job-details__second-title']").get(),
-            'paragraphs': response.xpath("//div[@class='job-details__paragraph']").get(),
-            'employer': response.xpath("//div[@class='jd-page__employer-overview']").get(),
+            **job_details_to_save,
+            'response': response.body.decode('utf-8'),
         }
